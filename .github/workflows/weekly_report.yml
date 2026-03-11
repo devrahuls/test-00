@@ -23,7 +23,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          cd regression/manual
+          cd manual/
           pip install -r requirements.txt
           
       - name: Run Script to Generate Report
@@ -32,7 +32,7 @@ jobs:
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          cd regression/manual
+          cd manual/
           python generate_report.py
           
       - name: Create Pull Request
@@ -46,10 +46,10 @@ jobs:
           body: |
             Automated weekly report of BrowserStack Test Cases (Added, Modified, Deleted).
             
-            Please review the markdown report in `regression/manual/reports/`.
+            Please review the markdown report in `manual/reports/`.
             
             ⚠️ **IMPORTANT: State Tracking Limitation**
             This PR contains an update to `previous_state.json`. In order for next week's cron job to accurately diff the test cases, **this PR MUST be merged into `main` before the next schedule triggers**. If it is not merged, next week's run will incorrectly compare against the older state and generate duplicate test case reports.
           add-paths: |
-            regression/manual/previous_state.json
-            regression/manual/reports/*.md
+            manual/previous_state.json
+            manual/reports/*.md
