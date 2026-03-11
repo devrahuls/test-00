@@ -23,7 +23,6 @@ jobs:
           
       - name: Install dependencies
         run: |
-          cd manual/
           pip install -r requirements.txt
           
       - name: Run Script to Generate Report
@@ -32,7 +31,6 @@ jobs:
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          cd manual/
           python generate_report.py
           
       - name: Create Pull Request
@@ -51,5 +49,5 @@ jobs:
             ⚠️ **IMPORTANT: State Tracking Limitation**
             This PR contains an update to `previous_state.json`. In order for next week's cron job to accurately diff the test cases, **this PR MUST be merged into `main` before the next schedule triggers**. If it is not merged, next week's run will incorrectly compare against the older state and generate duplicate test case reports.
           add-paths: |
-            manual/previous_state.json
-            manual/reports/*.md
+            previous_state.json
+            reports/*.md
