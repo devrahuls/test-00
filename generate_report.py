@@ -39,7 +39,6 @@ def fetch_project_id():
     print(f"Using Project: {first_project.get('name')} (ID: {project_identifier})")
     return project_identifier
 
-
 def fetch_all_test_cases(project_id):
     test_cases = {}
     page = 1
@@ -54,9 +53,20 @@ def fetch_all_test_cases(project_id):
         if not cases:
             break
             
-        for case in cases:
+        for i, case in enumerate(cases):
+            # Temporarily print the keys of the very first test case so we can inspect the true JSON structure from the action logs
+            if page == 1 and i == 0:
+                print(f"[DEBUG] First case keys array: {list(case.keys())}")
+            
+            # Attempting multiple fallback keys since BrowserStack's JSON structure can vary
+            tc_id = case.get("id") or case.get("identifier") or case.get("TC_ID")
+            
+            if not tc_id:
+                print(f"[DEBUG] Could not find an ID key for test case! Object: {json.dumps(case)}")
+                continue
+                
             # Storing by ID for easy delta comparison
-            test_cases[str(case["id"])] = case
+            test_cases[str(tc_id)] = case
             
         page += 1
         
