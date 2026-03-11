@@ -35,8 +35,10 @@ def fetch_project_id():
         
     # Default to the first project if not specified
     first_project = projects["projects"][0]
-    print(f"Using Project: {first_project.get('name')} (ID: {first_project.get('id')})")
-    return first_project.get('id')
+    project_identifier = first_project.get('identifier')
+    print(f"Using Project: {first_project.get('name')} (ID: {project_identifier})")
+    return project_identifier
+
 
 def fetch_all_test_cases(project_id):
     test_cases = {}
