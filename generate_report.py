@@ -5,9 +5,10 @@ import requests
 import sys
 
 # Configurations
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 API_BASE_URL = "https://test-management.browserstack.com/api/v2"
-PREVIOUS_STATE_FILE = "previous_state.json"
-REPORTS_DIR = "reports"
+PREVIOUS_STATE_FILE = os.path.join(BASE_DIR, "previous_state.json")
+REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 
 # Credentials from Environment
 USERNAME = os.environ.get("BROWSERSTACK_USERNAME")
@@ -25,7 +26,7 @@ def fetch_project_id():
     if PROJECT_ID:
         return PROJECT_ID
     
-    response = requests.get(f"{API_BASE_URL}/projects", auth=get_auth())
+    response = requests.get(f"{API_BASE_URL}/projects", auth=get_auth(), timeout=15)
     response.raise_for_status()
     projects = response.json()
     
@@ -41,11 +42,12 @@ def fetch_project_id():
 
 def fetch_all_test_cases(project_id):
     test_cases = {}
+    skipped_count = 0
     page = 1
     
     while True:
         # BrowserStack uses pagination, adjust 'limit' if needed per their docs
-        response = requests.get(f"{API_BASE_URL}/projects/{project_id}/test-cases?p={page}&page_size=300", auth=get_auth())
+        response = requests.get(f"{API_BASE_URL}/projects/{project_id}/test-cases?p={page}&page_size=300", auth=get_auth(), timeout=15)
         print(f"Fetching page {page}...")
         response.raise_for_status()
         data = response.json()
@@ -59,6 +61,7 @@ def fetch_all_test_cases(project_id):
             tc_id = case.get("id") or case.get("identifier") or case.get("TC_ID")
             
             if not tc_id:
+                skipped_count += 1
                 if page == 1 and i == 0:
                      print(f"[DEBUG] Could not find an ID key for test case! Object: {json.dumps(case)}")
                 continue
@@ -72,24 +75,31 @@ def fetch_all_test_cases(project_id):
             
         page += 1
         
+    if skipped_count > 0:
+        print(f"Warning: Skipped {skipped_count} test cases due to missing IDs.")
+        
     return test_cases
 
 def load_previous_state():
     if os.path.exists(PREVIOUS_STATE_FILE):
-        with open(PREVIOUS_STATE_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(PREVIOUS_STATE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print(f"Warning: {PREVIOUS_STATE_FILE} is corrupt or empty. Starting fresh.")
+            return {}
     return {}
 
 def save_current_state(state):
-    with open(PREVIOUS_STATE_FILE, "w") as f:
+    with open(PREVIOUS_STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2)
 
 def generate_report_markdown(added, modified, deleted, current_state):
     os.makedirs(REPORTS_DIR, exist_ok=True)
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    report_filename = f"{REPORTS_DIR}/browserstack_report_{today}.md"
+    report_filename = os.path.join(REPORTS_DIR, f"browserstack_report_{today}.md")
     
-    with open(report_filename, "w") as f:
+    with open(report_filename, "w", encoding="utf-8") as f:
         f.write(f"# Weekly BrowserStack Test Cases Report ({today})\n\n")
         f.write(f"**Total Test Cases:** {len(current_state)}\n\n")
         
@@ -128,7 +138,7 @@ def send_slack_notification(added_count, modified_count, deleted_count, total_co
                 f"_Check the latest Pull Request for the detailed markdown report._"
     }
     
-    response = requests.post(SLACK_WEBHOOK_URL, json=message)
+    response = requests.post(SLACK_WEBHOOK_URL, json=message, timeout=15)
     if response.status_code != 200:
         print(f"Error sending Slack message: {response.text}")
     else:
