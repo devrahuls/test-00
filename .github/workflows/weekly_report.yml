@@ -36,7 +36,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           commit-message: "chore: weekly browserstack test cases report"
           branch: "chore/browserstack-weekly-report"
           delete-branch: true
