@@ -1,4 +1,38 @@
 {
+  "TC-1490": {
+    "case_type": "Other",
+    "priority": "Medium",
+    "status": "Active",
+    "folder_id": 36117155,
+    "issues": [],
+    "created_at": "2026-03-11T10:17:26.000Z",
+    "last_updated_at": "2026-03-11T10:17:26.000Z",
+    "created_by": "rahul.saw@apnamart.in",
+    "updated_by": "rahul.saw@apnamart.in",
+    "folder_path": [
+      36117155
+    ],
+    "tags": [],
+    "template": "test_case_steps",
+    "description": null,
+    "preconditions": "<p dir=\"ltr\"><span style=\"white-space: pre-wrap;\">sd</span></p>",
+    "title": "whatever",
+    "is_shared": false,
+    "identifier": "TC-1490",
+    "automation_status": "not_automated",
+    "owner": "rahul.saw@apnamart.in",
+    "attachments": [],
+    "steps": [
+      {
+        "step": "<p dir=\"ltr\"><span style=\"white-space: pre-wrap;\">ds</span></p>",
+        "result": "<p dir=\"ltr\"><span style=\"white-space: pre-wrap;\">dfs</span></p>"
+      }
+    ],
+    "custom_fields": [],
+    "urls": {
+      "self": "https://test-management.browserstack.com/projects/2008400/folder/36117155/test-cases/92747347"
+    }
+  },
   "TC-1489": {
     "case_type": "Other",
     "priority": "Medium",
