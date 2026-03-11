@@ -45,7 +45,8 @@ def fetch_all_test_cases(project_id):
     
     while True:
         # BrowserStack uses pagination, adjust 'limit' if needed per their docs
-        response = requests.get(f"{API_BASE_URL}/projects/{project_id}/test-cases?page={page}&limit=100", auth=get_auth())
+        response = requests.get(f"{API_BASE_URL}/projects/{project_id}/test-cases?p={page}&page_size=300", auth=get_auth())
+        print(f"Fetching page {page}...")
         response.raise_for_status()
         data = response.json()
         
@@ -54,19 +55,20 @@ def fetch_all_test_cases(project_id):
             break
             
         for i, case in enumerate(cases):
-            # Temporarily print the keys of the very first test case so we can inspect the true JSON structure from the action logs
-            if page == 1 and i == 0:
-                print(f"[DEBUG] First case keys array: {list(case.keys())}")
-            
             # Attempting multiple fallback keys since BrowserStack's JSON structure can vary
             tc_id = case.get("id") or case.get("identifier") or case.get("TC_ID")
             
             if not tc_id:
-                print(f"[DEBUG] Could not find an ID key for test case! Object: {json.dumps(case)}")
+                if page == 1 and i == 0:
+                     print(f"[DEBUG] Could not find an ID key for test case! Object: {json.dumps(case)}")
                 continue
                 
             # Storing by ID for easy delta comparison
             test_cases[str(tc_id)] = case
+            
+        info = data.get("info", {})
+        if info.get("next") is None:
+            break
             
         page += 1
         
